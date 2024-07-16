@@ -53,6 +53,8 @@ class SmartFaceCamera extends StatefulWidget {
   /// The controller for the [SmartFaceCamera] widget.
   final FaceCameraController controller;
 
+  final Size? customSize = null;
+
   const SmartFaceCamera(
       {required this.controller,
       this.showControls = true,
@@ -60,8 +62,7 @@ class SmartFaceCamera extends StatefulWidget {
       this.showFlashControl = true,
       this.showCameraLensControl = true,
       this.message,
-      this.messageStyle = const TextStyle(
-          fontSize: 14, height: 1.5, fontWeight: FontWeight.w400),
+      this.messageStyle = const TextStyle(fontSize: 14, height: 1.5, fontWeight: FontWeight.w400),
       this.captureControlBuilder,
       this.lensControlIcon,
       this.flashControlBuilder,
@@ -71,9 +72,7 @@ class SmartFaceCamera extends StatefulWidget {
       this.indicatorBuilder,
       this.autoDisableCaptureControl = false,
       Key? key})
-      : assert(
-            indicatorShape != IndicatorShape.image ||
-                indicatorAssetImage != null,
+      : assert(indicatorShape != IndicatorShape.image || indicatorAssetImage != null,
             'IndicatorAssetImage must be provided when IndicatorShape is set to image.'),
         super(key: key);
 
@@ -81,8 +80,7 @@ class SmartFaceCamera extends StatefulWidget {
   State<SmartFaceCamera> createState() => _SmartFaceCameraState();
 }
 
-class _SmartFaceCameraState extends State<SmartFaceCamera>
-    with WidgetsBindingObserver {
+class _SmartFaceCameraState extends State<SmartFaceCamera> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -110,7 +108,11 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    Size size = MediaQuery.of(context).size;
+    if (widget.customSize != null) {
+      size = widget.customSize!;
+    }
+
     return ValueListenableBuilder<FaceCameraState>(
       valueListenable: widget.controller,
       builder: (BuildContext context, FaceCameraState value, Widget? child) {
@@ -118,8 +120,7 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
         return Stack(
           alignment: Alignment.center,
           children: [
-            if (cameraController != null &&
-                cameraController.value.isInitialized) ...[
+            if (cameraController != null && cameraController.value.isInitialized) ...[
               Transform.scale(
                 scale: 1.0,
                 child: AspectRatio(
@@ -135,35 +136,25 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
                           fit: StackFit.expand,
                           children: <Widget>[
                             _cameraDisplayWidget(value),
-                            if (value.detectedFace != null &&
-                                widget.indicatorShape !=
-                                    IndicatorShape.none) ...[
+                            if (value.detectedFace != null && widget.indicatorShape != IndicatorShape.none) ...[
                               SizedBox(
-                                  width:
-                                      cameraController.value.previewSize!.width,
-                                  height: cameraController
-                                      .value.previewSize!.height,
+                                  width: cameraController.value.previewSize!.width,
+                                  height: cameraController.value.previewSize!.height,
                                   child: widget.indicatorBuilder?.call(
                                           context,
                                           value.detectedFace,
                                           Size(
-                                            cameraController
-                                                .value.previewSize!.height,
-                                            cameraController
-                                                .value.previewSize!.width,
+                                            cameraController.value.previewSize!.height,
+                                            cameraController.value.previewSize!.width,
                                           )) ??
                                       CustomPaint(
                                         painter: FacePainter(
                                             face: value.detectedFace!.face,
-                                            indicatorShape:
-                                                widget.indicatorShape,
-                                            indicatorAssetImage:
-                                                widget.indicatorAssetImage,
+                                            indicatorShape: widget.indicatorShape,
+                                            indicatorAssetImage: widget.indicatorAssetImage,
                                             imageSize: Size(
-                                              cameraController
-                                                  .value.previewSize!.height,
-                                              cameraController
-                                                  .value.previewSize!.width,
+                                              cameraController.value.previewSize!.height,
+                                              cameraController.value.previewSize!.width,
                                             )),
                                       ))
                             ]
@@ -193,17 +184,13 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.showFlashControl) ...[
-                        _flashControlWidget(value)
-                      ],
+                      if (widget.showFlashControl) ...[_flashControlWidget(value)],
                       if (widget.showCaptureControl) ...[
                         const SizedBox(width: 15),
                         _captureControlWidget(value),
                         const SizedBox(width: 15)
                       ],
-                      if (widget.showCameraLensControl) ...[
-                        _lensControlWidget()
-                      ],
+                      if (widget.showCameraLensControl) ...[_lensControlWidget()],
                     ],
                   ),
                 ),
@@ -226,8 +213,7 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
         if (widget.message != null) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
-            child: Text(widget.message!,
-                textAlign: TextAlign.center, style: widget.messageStyle),
+            child: Text(widget.message!, textAlign: TextAlign.center, style: widget.messageStyle),
           );
         }
         return const SizedBox.shrink();
@@ -237,13 +223,10 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
   }
 
   /// Determines when to disable the capture control button.
-  bool get _disableCapture =>
-      widget.autoDisableCaptureControl &&
-      widget.controller.value.detectedFace?.face == null;
+  bool get _disableCapture => widget.autoDisableCaptureControl && widget.controller.value.detectedFace?.face == null;
 
   /// Determines the camera controls color.
-  Color? get iconColor =>
-      widget.controller.enableControls ? null : Theme.of(context).disabledColor;
+  Color? get iconColor => widget.controller.enableControls ? null : Theme.of(context).disabledColor;
 
   /// Display the control buttons to take pictures.
   Widget _captureControlWidget(FaceCameraState value) {
@@ -252,16 +235,12 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
           CircleAvatar(
               radius: 35,
               foregroundColor:
-                  widget.controller.enableControls && !_disableCapture
-                      ? null
-                      : Theme.of(context).disabledColor,
+                  widget.controller.enableControls && !_disableCapture ? null : Theme.of(context).disabledColor,
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Icon(Icons.camera_alt, size: 35),
               )),
-      onPressed: widget.controller.enableControls && !_disableCapture
-          ? widget.controller.captureImage
-          : null,
+      onPressed: widget.controller.enableControls && !_disableCapture ? widget.controller.captureImage : null,
     );
   }
 
@@ -276,8 +255,7 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
             : Icons.flash_auto;
 
     return IconButton(
-      icon: widget.flashControlBuilder
-              ?.call(context, availableFlashMode[currentFlashMode]) ??
+      icon: widget.flashControlBuilder?.call(context, availableFlashMode[currentFlashMode]) ??
           CircleAvatar(
               radius: 25,
               foregroundColor: iconColor,
@@ -285,9 +263,7 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
                 padding: const EdgeInsets.all(2.0),
                 child: Icon(icon, size: 25),
               )),
-      onPressed: widget.controller.enableControls
-          ? widget.controller.changeFlashMode
-          : null,
+      onPressed: widget.controller.enableControls ? widget.controller.changeFlashMode : null,
     );
   }
 
@@ -302,8 +278,6 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
                   padding: EdgeInsets.all(2.0),
                   child: Icon(Icons.switch_camera_sharp, size: 25),
                 )),
-        onPressed: widget.controller.enableControls
-            ? widget.controller.changeCameraLens
-            : null);
+        onPressed: widget.controller.enableControls ? widget.controller.changeCameraLens : null);
   }
 }
