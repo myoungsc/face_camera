@@ -53,7 +53,7 @@ class SmartFaceCamera extends StatefulWidget {
   /// The controller for the [SmartFaceCamera] widget.
   final FaceCameraController controller;
 
-  final Size? customSize = null;
+  final Size? customSize;
 
   const SmartFaceCamera(
       {required this.controller,
@@ -71,6 +71,7 @@ class SmartFaceCamera extends StatefulWidget {
       this.indicatorAssetImage,
       this.indicatorBuilder,
       this.autoDisableCaptureControl = false,
+      this.customSize,
       Key? key})
       : assert(indicatorShape != IndicatorShape.image || indicatorAssetImage != null,
             'IndicatorAssetImage must be provided when IndicatorShape is set to image.'),
