@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../face_camera.dart';
 import 'controllers/face_camera_state.dart';
-import 'paints/face_painter.dart';
-import 'paints/hole_painter.dart';
 import 'res/builders.dart';
 
 class SmartFaceCamera extends StatefulWidget {
@@ -132,33 +130,33 @@ class _SmartFaceCameraState extends State<SmartFaceCamera> with WidgetsBindingOb
                       fit: BoxFit.fitHeight,
                       child: SizedBox(
                         width: size.width,
-                        height: size.width * cameraController.value.aspectRatio,
+                        height: size.width / size.height, //cameraController.value.aspectRatio,
                         child: Stack(
                           fit: StackFit.expand,
                           children: <Widget>[
                             _cameraDisplayWidget(value),
-                            if (value.detectedFace != null && widget.indicatorShape != IndicatorShape.none) ...[
-                              SizedBox(
-                                  width: cameraController.value.previewSize!.width,
-                                  height: cameraController.value.previewSize!.height,
-                                  child: widget.indicatorBuilder?.call(
-                                          context,
-                                          value.detectedFace,
-                                          Size(
-                                            cameraController.value.previewSize!.height,
-                                            cameraController.value.previewSize!.width,
-                                          )) ??
-                                      CustomPaint(
-                                        painter: FacePainter(
-                                            face: value.detectedFace!.face,
-                                            indicatorShape: widget.indicatorShape,
-                                            indicatorAssetImage: widget.indicatorAssetImage,
-                                            imageSize: Size(
-                                              cameraController.value.previewSize!.height,
-                                              cameraController.value.previewSize!.width,
-                                            )),
-                                      ))
-                            ]
+                            // if (value.detectedFace != null && widget.indicatorShape != IndicatorShape.none) ...[
+                            //   SizedBox(
+                            //       width: cameraController.value.previewSize!.width,
+                            //       height: cameraController.value.previewSize!.height,
+                            //       child: widget.indicatorBuilder?.call(
+                            //               context,
+                            //               value.detectedFace,
+                            //               Size(
+                            //                 cameraController.value.previewSize!.height,
+                            //                 cameraController.value.previewSize!.width,
+                            //               )) ??
+                            //           CustomPaint(
+                            //             painter: FacePainter(
+                            //                 face: value.detectedFace!.face,
+                            //                 indicatorShape: widget.indicatorShape,
+                            //                 indicatorAssetImage: widget.indicatorAssetImage,
+                            //                 imageSize: Size(
+                            //                   cameraController.value.previewSize!.height,
+                            //                   cameraController.value.previewSize!.width,
+                            //                 )),
+                            //           ))
+                            // ]
                           ],
                         ),
                       ),
@@ -166,17 +164,18 @@ class _SmartFaceCameraState extends State<SmartFaceCamera> with WidgetsBindingOb
                   ),
                 ),
               )
-            ] else ...[
-              const Text('No Camera Detected',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w500,
-                  )),
-              CustomPaint(
-                size: size,
-                painter: HolePainter(),
-              )
             ],
+            // ] else ...[
+            //   const Text('No Camera Detected',
+            //       style: TextStyle(
+            //         fontSize: 18.0,
+            //         fontWeight: FontWeight.w500,
+            //       )),
+            //   CustomPaint(
+            //     size: size,
+            //     painter: HolePainter(),
+            //   )
+            // ],
             if (widget.showControls) ...[
               Align(
                 alignment: Alignment.bottomCenter,
