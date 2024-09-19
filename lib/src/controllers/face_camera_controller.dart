@@ -52,8 +52,6 @@ class FaceCameraController extends ValueNotifier<FaceCameraState> {
   /// Callback invoked when camera detects face.
   final void Function(Face? face)? onFaceDetected;
 
-  double aspectRatio = 0.0;
-
   /// Gets all available camera lens and set current len
   void _getAllAvailableCameraLens() {
     int currentCameraLens = 0;
@@ -88,8 +86,6 @@ class FaceCameraController extends ValueNotifier<FaceCameraState> {
           cameras.first, EnumHandler.imageResolutionToResolutionPreset(imageResolution),
           enableAudio: enableAudio,
           imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888);
-
-      aspectRatio = cameraController.value.aspectRatio;
 
       await cameraController.initialize().whenComplete(() {
         value = value.copyWith(isInitialized: true, cameraController: cameraController);
