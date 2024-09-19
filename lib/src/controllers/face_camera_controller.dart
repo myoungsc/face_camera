@@ -52,6 +52,8 @@ class FaceCameraController extends ValueNotifier<FaceCameraState> {
   /// Callback invoked when camera detects face.
   final void Function(Face? face)? onFaceDetected;
 
+  double aspectRatio = 0.0;
+
   /// Gets all available camera lens and set current len
   void _getAllAvailableCameraLens() {
     int currentCameraLens = 0;
@@ -71,56 +73,47 @@ class FaceCameraController extends ValueNotifier<FaceCameraState> {
       }
     }
 
-    value = value.copyWith(
-        availableCameraLens: availableCameraLens,
-        currentCameraLens: currentCameraLens);
+    value = value.copyWith(availableCameraLens: availableCameraLens, currentCameraLens: currentCameraLens);
   }
 
   Future<void> _initCamera() async {
     final cameras = FaceCamera.cameras
         .where((c) =>
             c.lensDirection ==
-            EnumHandler.cameraLensToCameraLensDirection(
-                value.availableCameraLens[value.currentCameraLens]))
+            EnumHandler.cameraLensToCameraLensDirection(value.availableCameraLens[value.currentCameraLens]))
         .toList();
 
     if (cameras.isNotEmpty) {
-      final cameraController = CameraController(cameras.first,
-          EnumHandler.imageResolutionToResolutionPreset(imageResolution),
+      final cameraController = CameraController(
+          cameras.first, EnumHandler.imageResolutionToResolutionPreset(imageResolution),
           enableAudio: enableAudio,
-          imageFormatGroup: Platform.isAndroid
-              ? ImageFormatGroup.nv21
-              : ImageFormatGroup.bgra8888);
+          imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888);
+
+      aspectRatio = cameraController.value.aspectRatio;
 
       await cameraController.initialize().whenComplete(() {
-        value = value.copyWith(
-            isInitialized: true, cameraController: cameraController);
+        value = value.copyWith(isInitialized: true, cameraController: cameraController);
       });
 
       await changeFlashMode(value.availableFlashMode.indexOf(defaultFlashMode));
 
-      await cameraController.lockCaptureOrientation(
-          EnumHandler.cameraOrientationToDeviceOrientation(orientation));
+      await cameraController.lockCaptureOrientation(EnumHandler.cameraOrientationToDeviceOrientation(orientation));
     }
 
     startImageStream();
   }
 
   Future<void> changeFlashMode([int? index]) async {
-    final newIndex =
-        index ?? (value.currentFlashMode + 1) % value.availableFlashMode.length;
+    final newIndex = index ?? (value.currentFlashMode + 1) % value.availableFlashMode.length;
     await value.cameraController!
-        .setFlashMode(EnumHandler.cameraFlashModeToFlashMode(
-            value.availableFlashMode[newIndex]))
+        .setFlashMode(EnumHandler.cameraFlashModeToFlashMode(value.availableFlashMode[newIndex]))
         .then((_) {
       value = value.copyWith(currentFlashMode: newIndex);
     });
   }
 
   Future<void> changeCameraLens() async {
-    value = value.copyWith(
-        currentCameraLens:
-            (value.currentCameraLens + 1) % value.availableCameraLens.length);
+    value = value.copyWith(currentCameraLens: (value.currentCameraLens + 1) % value.availableCameraLens.length);
     _initCamera();
   }
 
@@ -175,9 +168,7 @@ class FaceCameraController extends ValueNotifier<FaceCameraState> {
       value = value.copyWith(alreadyCheckingImage: true);
       try {
         await FaceIdentifier.scanImage(
-                cameraImage: cameraImage,
-                controller: cameraController,
-                performanceMode: performanceMode)
+                cameraImage: cameraImage, controller: cameraController, performanceMode: performanceMode)
             .then((result) async {
           value = value.copyWith(detectedFace: result);
 
